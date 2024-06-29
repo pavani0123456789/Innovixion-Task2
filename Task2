@@ -1,0 +1,122 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class TaskSchedulerApp {
+
+    static class Task {
+        private String name;
+        private LocalDate dueDate;
+        private int priority;
+
+        public Task(String name, LocalDate dueDate, int priority) {
+            this.name = name;
+            this.dueDate = dueDate;
+            this.priority = priority;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public LocalDate getDueDate() {
+            return dueDate;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Task: %s | Due Date: %s | Priority: %d", name, dueDate, priority);
+        }
+    }
+
+    static class TaskManager {
+        private List<Task> tasks = new ArrayList<>();
+
+        public void addTask(Task task) {
+            tasks.add(task);
+        }
+
+        public List<Task> getTasks() {
+            return tasks.isEmpty() ? List.of() : new ArrayList<>(tasks);
+        }
+
+        public void notifyTasks() {
+            LocalDate today = LocalDate.now();
+            for (Task task : tasks) {
+                if (task.getDueDate().isBefore(today)) {
+                    System.out.println("Overdue Task: " + task);
+                } else if (!task.getDueDate().isAfter(today.plusDays(2))) {
+                    System.out.println("Upcoming Task: " + task);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        TaskManager taskManager = new TaskManager();
+        Scanner scanner = new Scanner(System.in);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\nTask Scheduler Menu:");
+            System.out.println("1. Add Task");
+            System.out.println("2. List Tasks");
+            System.out.println("3. Check Notifications");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter task name: ");
+                    String name = scanner.nextLine();
+
+                    System.out.print("Enter due date (yyyy-MM-dd): ");
+                    String dateStr = scanner.nextLine();
+                    LocalDate dueDate = LocalDate.parse(dateStr, dateFormatter);
+
+                    System.out.print("Enter priority (1-5): ");
+                    int priority = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+
+                    Task task = new Task(name, dueDate, priority);
+                    taskManager.addTask(task);
+                    System.out.println("Task added successfully!");
+                    break;
+
+                case 2:
+                    List<Task> tasks = taskManager.getTasks();
+                    if (tasks.isEmpty()) {
+                        System.out.println("No tasks available.");
+                    } else {
+                        for (Task t : tasks) {
+                            System.out.println(t);
+                        }
+                    }
+                    break;
+
+                case 3:
+                    taskManager.notifyTasks();
+                    break;
+
+                case 4:
+                    running = false;
+                    System.out.println("Exiting the Task Scheduler. Goodbye!");
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+        scanner.close();
+    }
+}
